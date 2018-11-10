@@ -93,12 +93,6 @@ int main(int argc, char **argv)
     while(appletMainLoop())
     {
         hidScanInput();
-
-//      u64 kDown = hidKeysHeld(CONTROLLER_P1_AUTO);
-
-      if (kDown & KEY_PLUS && kDown & KEY_MINUS) break; // break in order to return to hbmenu
-
-
         
         u32 width, height;
         u32 pos;
