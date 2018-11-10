@@ -5,12 +5,12 @@ import (
 	"image"
 	"log"
 	"os"
-	"os/exec"
 	"os/signal"
 
 	"github.com/BurntSushi/xgb"
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/google/gousb"
+	"github.com/nfnt/resize"
 )
 
 func CaptureScreen(c *xgb.Conn) (*image.RGBA, error) {
@@ -35,8 +35,8 @@ func CaptureScreen(c *xgb.Conn) (*image.RGBA, error) {
 }
 
 func main() {
-	exec.Command("xrandr", "--output", "eDP1", "--mode", "640x360").Output()
-	defer exec.Command("xrandr", "--output", "eDP1", "--auto").Output()
+	//exec.Command("xrandr", "--output", "eDP1", "--mode", "640x360").Output()
+	//defer exec.Command("xrandr", "--output", "eDP1", "--auto").Output()
 
 	c, err := xgb.NewConn()
 	if err != nil {
@@ -84,10 +84,11 @@ func main() {
 
 		}
 		img, err := CaptureScreen(c)
+		outimg := resize.Resize(640, 360, img, resize.NearestNeighbor)
 
 		if err != nil {
 			panic(err)
 		}
-		ep.Write(img.Pix)
+		ep.Write(outimg.(*image.RGBA).Pix)
 	}
 }
