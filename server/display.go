@@ -36,7 +36,7 @@ func CaptureScreen(c *xgb.Conn) (*image.RGBA, error) {
 
 func main() {
 	exec.Command("xrandr", "--output", "eDP1", "--mode", "640x360").Output()
-	defer exec.Command("xrandr", "--output", "eDP1", "--mode", "1920x1080").Output()
+	defer exec.Command("xrandr", "--output", "eDP1", "--auto").Output()
 
 	c, err := xgb.NewConn()
 	if err != nil {
@@ -60,10 +60,17 @@ func main() {
 	defer done()
 
 	// Open an OUT endpoint.
-	ep, err := intf.OutEndpoint(1)
+	ep, err := intf.OutEndpoint(0x1)
 	if err != nil {
 		log.Fatalf("%s.OutEndpoint(1): %v", intf, err)
 	}
+
+	inp, err := intf.InEndpoint(0x81)
+	if err != nil {
+		log.Fatalf("%s.InEndpoint(1): %v", intf, err)
+
+	}
+	go inputHandler(inp)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)

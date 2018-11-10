@@ -46,39 +46,57 @@ size_t transport_safe_write(const void *buffer, size_t size)
     return size;
 }
 
+struct JoyPkg {
+    unsigned long heldKeys;
+    int lJoyX;
+    int lJoyY;
+    int rJoyX;
+    int rJoyY;
+};
 
+void inputPoller(void* DISCARD) {
+    JoystickPosition lJoy;
+    JoystickPosition rJoy;
+    struct JoyPkg* pkg = memalign(0x1000, sizeof(struct JoyPkg));
+    while(appletMainLoop()) {
+        pkg->heldKeys = hidKeysHeld(CONTROLLER_P1_AUTO);
+        hidJoystickRead(&lJoy, CONTROLLER_P1_AUTO, JOYSTICK_LEFT);
+        hidJoystickRead(&rJoy, CONTROLLER_P1_AUTO, JOYSTICK_RIGHT);
+        pkg->lJoyX = lJoy.dx;
+        pkg->lJoyY = lJoy.dy;
+        pkg->rJoyX = rJoy.dx;
+        pkg->rJoyY = rJoy.dy;
+        transport_safe_write(pkg, sizeof(struct JoyPkg));
+        svcSleepThread(33333333);
+    }
+}
 
 int main(int argc, char **argv)
 {
     u32* framebuf;
     u32  cnt=0;
 
-    //Enable max-1080p support. Remove for 720p-only resolution.
-    //gfxInitResolutionDefault();
+    Thread inputThread;
+    threadCreate(&inputThread, inputPoller, NULL, 0x1000, 0x3B, -2);
+    threadStart(&inputThread);
 
     gfxInitDefault();
-    //gfxInitResolution(640, 360);
     gfxConfigureResolution(640, 360);
 
 
     u8* imageptr = memalign(0x1000, 640 * 360 * 4);
     
 
-    //Set current resolution automatically depending on current/changed OperationMode. Only use this when using gfxInitResolution*().
-    //gfxConfigureAutoResolutionDefault(true);
-
-    Result res = usbCommsInitialize();
+    usbCommsInitialize();
 
 
     while(appletMainLoop())
     {
-        //Scan all the inputs. This should be done once for each frame
         hidScanInput();
 
-        //hidKeysDown returns information about which buttons have been just pressed (and they weren't in the previous frame)
-        u64 kDown = hidKeysDown(CONTROLLER_P1_AUTO);
+//      u64 kDown = hidKeysHeld(CONTROLLER_P1_AUTO);
 
-        if (kDown & KEY_PLUS) break; // break in order to return to hbmenu
+      if (kDown & KEY_PLUS && kDown & KEY_MINUS) break; // break in order to return to hbmenu
 
 
         
@@ -102,7 +120,6 @@ int main(int argc, char **argv)
         gfxFlushBuffers();
         gfxSwapBuffers();
     }
-
     usbCommsExit();
 
     gfxExit();
