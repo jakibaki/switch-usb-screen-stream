@@ -108,9 +108,9 @@ func inputHandler(ep *gousb.InEndpoint) {
 		ui.KeyEvent(uinput.BTN_THUMBR, keyHeld(keyRStick, pkg))
 
 		ui.AbsEvent(uinput.ABS_X, uinput.EventValue(pkg.LJoyX))
-		ui.AbsEvent(uinput.ABS_Y, uinput.EventValue(pkg.LJoyY))
+		ui.AbsEvent(uinput.ABS_Y, uinput.EventValue(-pkg.LJoyY))
 		ui.AbsEvent(uinput.ABS_RX, uinput.EventValue(pkg.RJoyX))
-		ui.AbsEvent(uinput.ABS_RY, uinput.EventValue(pkg.RJoyY))
+		ui.AbsEvent(uinput.ABS_RY, uinput.EventValue(-pkg.RJoyY))
 
 		// Dpad
 		if (pkg.HeldKeys & keyLeft) > 0 {
@@ -122,9 +122,9 @@ func inputHandler(ep *gousb.InEndpoint) {
 		}
 
 		if (pkg.HeldKeys & keyDown) > 0 {
-			ui.AbsEvent(uinput.ABS_HAT0Y, uinput.EventValue(-1))
-		} else if (pkg.HeldKeys & keyUp) > 0 {
 			ui.AbsEvent(uinput.ABS_HAT0Y, uinput.EventValue(1))
+		} else if (pkg.HeldKeys & keyUp) > 0 {
+			ui.AbsEvent(uinput.ABS_HAT0Y, uinput.EventValue(-1))
 		} else {
 			ui.AbsEvent(uinput.ABS_HAT0Y, uinput.EventValue(0))
 		}
