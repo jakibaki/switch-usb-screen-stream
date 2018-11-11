@@ -4,15 +4,6 @@
 #include <string.h>
 #include <malloc.h>
 
-#ifdef DISPLAY_IMAGE
-#include "image_bin.h"//Your own raw RGB888 1280x720 image at "data/image.bin" is required.
-#endif
-
-//See also libnx gfx.h.
-
-
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
 size_t transport_safe_read(void *buffer, size_t size)
 {
     u8 *bufptr = buffer;
@@ -21,7 +12,6 @@ size_t transport_safe_read(void *buffer, size_t size)
 
     while (cursize)
     {
-        printf("%ld\n", cursize);
         tmpsize = usbCommsRead(bufptr, cursize);
         bufptr += tmpsize;
         cursize -= tmpsize;
