@@ -63,6 +63,8 @@ void inputPoller(void* DISCARD) {
 
 int main(int argc, char **argv)
 {
+#define RESX 1280/2
+#define RESY 720/2
     u32* framebuf;
     u32  cnt=0;
 
@@ -71,10 +73,10 @@ int main(int argc, char **argv)
     threadStart(&inputThread);
 
     gfxInitDefault();
-    gfxConfigureResolution(640, 360);
+    gfxConfigureResolution(RESX, RESY);
 
 
-    u8* imageptr = memalign(0x1000, 640 * 360 * 4);
+    u8* imageptr = memalign(0x1000, RESX * RESY * 3);
     
 
     usbCommsInitialize();
@@ -89,7 +91,7 @@ int main(int argc, char **argv)
         framebuf = (u32*) gfxGetFramebuffer((u32*)&width, (u32*)&height);
 
 
-        transport_safe_read(imageptr, 640 * 360 * 4);
+        transport_safe_read(imageptr, RESX * RESY * 3);
 
         //Each pixel is 4-bytes due to RGBA8888.
         u32 x, y;
@@ -98,7 +100,7 @@ int main(int argc, char **argv)
             for (x=0; x<width; x++)
             {
                 pos = y * width + x;
-                framebuf[pos] = RGBA8_MAXALPHA(imageptr[pos*4+0]+(cnt*4), imageptr[pos*4+1], imageptr[pos*4+2]);
+                framebuf[pos] = RGBA8_MAXALPHA(imageptr[pos*3+0]+(cnt*4), imageptr[pos*3+1], imageptr[pos*3+2]);
             }
         }
         gfxFlushBuffers();

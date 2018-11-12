@@ -35,8 +35,8 @@ func CaptureScreen(c *xgb.Conn) (*image.RGBA, error) {
 }
 
 func main() {
-	//exec.Command("xrandr", "--output", "eDP1", "--mode", "640x360").Output()
-	//defer exec.Command("xrandr", "--output", "eDP1", "--auto").Output()
+	resx := uint(1280 / 2)
+	resy := uint(720 / 2)
 
 	c, err := xgb.NewConn()
 	if err != nil {
@@ -75,6 +75,8 @@ func main() {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt)
 
+	outbuf := make([]uint8, resx*resy*3)
+
 	for {
 		select {
 		case <-ch:
@@ -84,11 +86,16 @@ func main() {
 
 		}
 		img, err := CaptureScreen(c)
-		outimg := resize.Resize(640, 360, img, resize.NearestNeighbor)
+		outimg := resize.Resize(resx, resy, img, resize.NearestNeighbor)
 
 		if err != nil {
 			panic(err)
 		}
-		ep.Write(outimg.(*image.RGBA).Pix)
+		inbuf := outimg.(*image.RGBA).Pix
+		for i := uint(0); i < resx*resy; i++ {
+			copy(outbuf[i*3:i*3+3], inbuf[i*4:i*4+3])
+		}
+
+		ep.Write(outbuf)
 	}
 }
