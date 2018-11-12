@@ -38,10 +38,10 @@ size_t transport_safe_write(const void *buffer, size_t size)
 
 struct JoyPkg {
     unsigned long heldKeys;
-    int lJoyX;
-    int lJoyY;
-    int rJoyX;
-    int rJoyY;
+    short lJoyX;
+    short lJoyY;
+    short rJoyX;
+    short rJoyY;
 };
 
 void inputPoller(void* DISCARD) {

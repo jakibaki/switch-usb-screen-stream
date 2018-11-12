@@ -32,10 +32,10 @@ const (
 
 type inputPackage struct {
 	HeldKeys uint64
-	LJoyX    int32
-	LJoyY    int32
-	RJoyX    int32
-	RJoyY    int32
+	LJoyX    int16
+	LJoyY    int16
+	RJoyX    int16
+	RJoyY    int16
 }
 
 func keyHeld(key uint64, pkg inputPackage) uinput.EventValue {
@@ -84,12 +84,12 @@ func inputHandler(ep *gousb.InEndpoint) {
 	}
 
 	pkg := inputPackage{}
-	by := make([]byte, 24)
+	by := make([]byte, 0x10)
 
 	for {
 		time.Sleep(time.Millisecond * 20)
 		read, err := ep.Read(by)
-		if read != 24 || err != nil {
+		if read != 0x10 || err != nil {
 			continue
 		}
 		buffer := bytes.NewBuffer(by)
